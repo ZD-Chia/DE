@@ -1,0 +1,33 @@
+ETL Function
+
+def extract_table_to_df(tablename, db_engine):
+  retrun pd.read_sql("SELECT * FROM {}.format(tablename), db_engine)
+  
+def split_columns_transform(df, column, pat, suffixes):
+  #converts column into str and splits it on pat...
+
+def load_df_into_dwh(film_df, tablename, schema, db_engine):
+  return pd.to_sql(tablename, db_engine, schema=schema, if_exits="replace")
+
+db_engines = {...} #needs to be configured 
+def etl():
+  #extract
+  film_pdf = extract_table_to_df("film", db_engines["store"])
+  #trnasform
+  film_df = split_columns_transform(film_df, "rental_rate", ".",["_dollar", "_cents"])
+  #Load
+  load_df_into_dwh(film_df, "film", "store", db_engines["dwh"])
+  
+  
+  
+  DAG
+  from airflow.models import DAG
+  from airflow.operators.python_operator import PyhtonOperator
+  
+  dag = DAG(dag_id="etl_pipeline",
+            schedule_interval = " 0 0 * * *")
+            
+  etl_task = PythonOperator(task_id="etl_task",
+                            python_callable=etl,
+                            dag=dag)
+  etl_task.set_upstream(wait_for_this_task)
